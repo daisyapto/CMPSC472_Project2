@@ -23,14 +23,16 @@ def submitAndProcess(start, start1, start2):
 
     data = pd.read_csv("Train_Data.csv")
     print(data.head())
+    print("Min", min(data['charges']))
+    print("Max", max(data['charges']))
     sort = Sorting()
     visual = Visual()
     thread = Thread()
 
     if graphDisplay == 'Pie Chart':
-        thread.callFunction(data, threadCount, visual.drawPieGraph)
+        thread.callFunction(data, threadCount, visual.drawAllPieGraphs)
     elif graphDisplay == 'Line Chart':
-        thread.callFunction(data, threadCount, visual.drawLineGraph)
+        thread.callFunction(data, threadCount, visual.drawAllLineGraphs)
     elif graphDisplay == 'Bar Chart':
         thread.callFunction(data, threadCount, visual.drawAllBarGraphs)
 

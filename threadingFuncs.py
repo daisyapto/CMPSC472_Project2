@@ -13,6 +13,7 @@ class Thread:
         start = time.perf_counter_ns()
         for i in range(numOfThreads):
             thread = threading.Thread(target=function, args=(data,))
+            thread.daemon = True
             thread.start()
             threads.append(thread)
         for thread in threads:
