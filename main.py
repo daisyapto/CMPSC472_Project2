@@ -13,6 +13,10 @@ from sorting import Sorting
 from visual import Visual
 from threadingFuncs import Thread
 
+sort = Sorting()
+visual = Visual()
+thread = Thread()
+
 def submitAndProcess(start, start1, start2):
     graphDisplay = start.get()
     sortMethod = start1.get()
@@ -25,9 +29,6 @@ def submitAndProcess(start, start1, start2):
     print(data.head())
     print("Min", min(data['charges']))
     print("Max", max(data['charges']))
-    sort = Sorting()
-    visual = Visual()
-    thread = Thread()
 
     """
     if graphDisplay == 'Pie Chart':
@@ -39,11 +40,11 @@ def submitAndProcess(start, start1, start2):
     """
 
     if sortMethod == 'Selection Sort':
-        thread.callSortFunction(data, threadCount, sort.selectionSort)
+        thread.callSortFunction(data, threadCount, 'Selection Sort')
     elif sortMethod == 'Insertion Sort':
-        thread.callSortFunction(data, threadCount, sort.insertionSort)
+        thread.callSortFunction(data, threadCount, 'Insertion Sort')
     elif sortMethod == 'Merge Sort':
-        thread.callSortFunction(data, threadCount, sort.mergeSort)
+        thread.callSortFunction(data, threadCount, 'Merge Sort')
 
 def main():
     interface = tk.Tk()
@@ -66,11 +67,11 @@ def main():
     sorting = tk.OptionMenu(interface, start1, *options1)
     sorting.grid(row=1, column=1, padx=10, pady=10, sticky=tk.W)
 
-    options1 = [2, 4, 8, 16]
+    options2 = [2, 4, 8, 16]
     start2 = tk.StringVar(interface)
     threadLabel = tk.Label(interface, text="Choose number of threads for the above operations: ", bg='lightblue',fg='black', font=('arial', 16))
     threadLabel.grid(row=2, column=0, padx=10, pady=10, sticky=tk.W)
-    thread = tk.OptionMenu(interface, start2, *options1)
+    thread = tk.OptionMenu(interface, start2, *options2)
     thread.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
 
     submit = tk.Button(interface, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(start, start1, start2))
