@@ -29,19 +29,21 @@ def submitAndProcess(start, start1, start2):
     visual = Visual()
     thread = Thread()
 
+    """
     if graphDisplay == 'Pie Chart':
         thread.callFunction(data, threadCount, visual.drawAllPieGraphs)
     elif graphDisplay == 'Line Chart':
         thread.callFunction(data, threadCount, visual.drawAllLineGraphs)
     elif graphDisplay == 'Bar Chart':
         thread.callFunction(data, threadCount, visual.drawAllBarGraphs)
+    """
 
     if sortMethod == 'Selection Sort':
-        thread.callFunction(data, threadCount, sort.selectionSort)
+        thread.callSortFunction(data, threadCount, sort.selectionSort)
     elif sortMethod == 'Insertion Sort':
-        thread.callFunction(data, threadCount, sort.insertionSort)
+        thread.callSortFunction(data, threadCount, sort.insertionSort)
     elif sortMethod == 'Merge Sort':
-        thread.callFunction(data, threadCount, sort.mergeSort)
+        thread.callSortFunction(data, threadCount, sort.mergeSort)
 
 def main():
     interface = tk.Tk()
@@ -75,7 +77,6 @@ def main():
     submit.grid(row=3, column=0, padx=10, pady=10, sticky=tk.W)
 
     interface.mainloop()
-
 
 if __name__ == '__main__':
     main()

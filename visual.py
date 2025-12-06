@@ -3,11 +3,11 @@
 # Sorting functions: selection, merge, and xyz based on user input to compare time took to sort for n threads (sorting.py)
 
 import matplotlib.pyplot as plt
-from threading import Lock
+import threading
 
 class Visual:
     def __init__(self):
-        self.lock = Lock() # Use to make sure shared resources are accessed only once, not sure how yet
+        self.lock = threading.Lock() # Use to make sure shared resources are accessed only once, not sure how yet
 
     def ageBarGraph(self, data):
         age = data['age']
