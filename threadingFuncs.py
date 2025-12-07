@@ -4,6 +4,12 @@
 
 import threading
 import time
+import pandas as pd
+import concurrent.futures
+from visual import Visual
+from sorting import Sorting
+import threading
+import time
 from visual import Visual
 from sorting import Sorting
 import numpy as np
@@ -12,9 +18,8 @@ sortedMedChargesSelection = []
 sortedMedChargesInsertion = []
 sortedMedChargesMerge = []
 sort = Sorting()
-
 class Thread:
-    def callSortFunction(self, data, numOfThreads, functionName):
+    def callSortFunction(self, data, numOfThreads, sortBY, functionName):
         threads = []
         global sortedMedChargesSelection
         global sortedMedChargesInsertion
@@ -26,29 +31,26 @@ class Thread:
         # print("DATA SPLIT", dataSplit)
         for i in range(numOfThreads):
             if functionName == 'Selection Sort':
-                thread = threading.Thread(target=sort.selectionSort, args=(dataSplit[i], sortedMedChargesSelection,))
+                thread = threading.Thread(target=sort.selectionSort, args=(dataSplit[i], sortBY, sortedMedChargesSelection,))
                 thread.daemon = True
                 thread.start()
                 threads.append(thread)
             if functionName == 'Insertion Sort':
-                thread = threading.Thread(target=sort.insertionSort, args=(dataSplit[i], sortedMedChargesInsertion,))
+                thread = threading.Thread(target=sort.insertionSort, args=(dataSplit[i],sortBY, sortedMedChargesInsertion,))
                 thread.daemon = True
                 thread.start()
                 threads.append(thread)
-            elif functionName == 'Selection Sort':
-                thread = threading.Thread(target=sort.mergeSort, args=(dataSplit[i], sortedMedChargesMerge,))
+            '''elif functionName == 'Selection Sort': mergerSort???
+                thread = threading.Thread(target=sort.mergeSort, args=(dataSplit[i],sortBY, sortedMedChargesMerge,))
                 thread.daemon = True
                 thread.start()
-                threads.append(thread)
+                threads.append(thread)'''
         for thread in threads:
             thread.join()
 
-
-
-
         if functionName == 'Selection Sort':
-            print("Before", sortedMedChargesSelection)
-            print("Length", len(sortedMedChargesSelection))
+            #print("Before", sortedMedChargesSelection)
+            #print("Length", len(sortedMedChargesSelection))
             if numOfThreads == 2:
                 sortedMedChargesSelection = sort.listMerging(sortedMedChargesSelection[0], sortedMedChargesSelection[1])
             if numOfThreads == 4:
@@ -70,8 +72,8 @@ class Thread:
                 sortedMedChargesSelection = sort.listMerging(sortedMedChargesSelection1_2, sortedMedChargesSelection3_4)
             if numOfThreads == 16:
                 x=1 # Unsure how to efficiently merge when there are more chunks than 2, this seems inefficient but it does seem to work (?)
-            print("After", sortedMedChargesSelection)
-            print("Length", len(sortedMedChargesSelection))
+            #print("After", sortedMedChargesSelection)
+            #print("Length", len(sortedMedChargesSelection))
 
 
 
@@ -102,14 +104,13 @@ class Thread:
             print("After", sortedMedChargesInsertion)
             print("Length", len(sortedMedChargesInsertion))
 
-
-
-
+        sorted_df = pd.DataFrame(sortedMedChargesSelection, columns=data.columns)
         end = time.perf_counter_ns()
         print(f"-------- {numOfThreads} Threads running '{functionName}' sorting function -------")
         print("Execution Time: ", end - start)
         if functionName == 'Selection Sort':
             print("Selection Sort: ", sortedMedChargesSelection)
+            return sortedMedChargesSelection
         elif functionName == 'Insertion Sort':
             print("Insertion Sort: ", sortedMedChargesInsertion)
         elif functionName == 'Merge Sort':
@@ -137,6 +138,50 @@ class Thread:
         dataChunks = np.array_split(data, numOfThreads)
         return dataChunks
 
+    def lineSearch(self, data, searchBy, searchInfo): # No thread use
+        foundElements = []
+        for idx, row in data.iterrows():
+            if row[searchBy] == searchInfo:
+                foundElements.append(row)
+        return pd.DataFrame(foundElements)
+
+
+    def multitLinearSearch(self, data, numOfThreads, searchBy, searchInfo): # Thread use
+        rows = len(data)
+        foundElements =[]
+        lock = threading.Lock()
+        chunks = self.dataChunk( data, numOfThreads)
+        def threadSearch(chunk):
+            for idx, row in chunk.iterrows():
+                if row[searchBy] == searchInfo:
+                    lock.acquire()
+                    foundElements.append(row)
+                    lock.release()
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=numOfThreads) as executor:
+            for chunk in chunks:
+                executor.submit(threadSearch, chunk)
+        return pd.DataFrame(foundElements)
+
+
+    def multitBinarySearch(self, data, numOfThreads, searchBy, searchInfo):
+        foundElements = []
+        foundElementss= []
+        res = Sorting.selectionSort(self, data, numOfThreads, searchBy,foundElements)
+        low = 0
+        high = len(res) - 1
+
+        while low <= high:
+            mid = low + (high - low) // 2
+
+            if res[mid] < searchInfo:
+                low = mid + 1
+            elif res[mid] > searchInfo:
+                high = mid - 1
+            else:
+                foundElementss.append(mid)
+
+
 
 """
 Refer:
@@ -144,3 +189,5 @@ https://stackoverflow.com/questions/54237067/how-to-make-tkinter-gui-thread-safe
 https://stackoverflow.com/questions/50525849/why-more-number-of-threads-takes-more-time-to-process
 https://www.reddit.com/r/learnpython/comments/10qzto6/how_does_tkinter_multithreading_work_and_why/
 """
+#https://www.geeksforgeeks.org/dsa/linear-search-using-multi-threading/
+#https://www.geeksforgeeks.org/python/python-program-for-binary-search/
