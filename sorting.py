@@ -12,7 +12,7 @@ class Sorting:
     def selectionSort(self, data, globalList):
         charges = list(data['charges'])
         for i in range (len(charges)):
-            for j in range (i+1, len(charges), -1):
+            for j in range (i+1, len(charges)):
                 if charges[j] < charges[i]:
                     charges[j], charges[i] = charges[i], charges[j]
 
@@ -26,7 +26,7 @@ class Sorting:
         for i in range(1, len(charges)):
             insertValue = i
             currentCharge = charges.pop(i)
-            for j in range (i-1, 0):
+            for j in range (i-1, 0, -1):
                 if charges[j] <= currentCharge:
                     insertValue = j
             charges.insert(insertValue, currentCharge)

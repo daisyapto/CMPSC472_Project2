@@ -21,30 +21,29 @@ def submitAndProcess(start, start1, start2):
     graphDisplay = start.get()
     sortMethod = start1.get()
     threadCount = int(start2.get())
-    print(graphDisplay)
-    print(sortMethod)
-    print(threadCount)
+    #print(graphDisplay)
+    #print(sortMethod)
+    #print(threadCount)
 
     data = pd.read_csv("Train_Data.csv")
-    print(data.head())
-    print("Min", min(data['charges']))
-    print("Max", max(data['charges']))
+    #print(data.head())
+    #print("Min", min(data['charges']))
+    #print("Max", max(data['charges']))
 
-    """
+
     if graphDisplay == 'Pie Chart':
-        thread.callFunction(data, threadCount, visual.drawAllPieGraphs)
+        thread.callVisualFunction(data, threadCount, 'Pie Chart')
     elif graphDisplay == 'Line Chart':
-        thread.callFunction(data, threadCount, visual.drawAllLineGraphs)
+        thread.callVisualFunction(data, threadCount, 'Line Chart')
     elif graphDisplay == 'Bar Chart':
-        thread.callFunction(data, threadCount, visual.drawAllBarGraphs)
-    """
+        thread.callVisualFunction(data, threadCount, 'Bar Chart')
 
     if sortMethod == 'Selection Sort':
         thread.callSortFunction(data, threadCount, 'Selection Sort')
     elif sortMethod == 'Insertion Sort':
         thread.callSortFunction(data, threadCount, 'Insertion Sort')
-    elif sortMethod == 'Merge Sort':
-        thread.callSortFunction(data, threadCount, 'Merge Sort')
+    #elif sortMethod == 'Merge Sort':
+        #thread.callSortFunction(data, threadCount, 'Merge Sort')
 
 def main():
     interface = tk.Tk()
@@ -60,7 +59,7 @@ def main():
     graph = tk.OptionMenu(interface, start, *options)
     graph.grid(row=0, column=1, padx=10, pady=10, sticky=tk.W)
 
-    options1 = ['Selection Sort', 'Insertion Sort', 'Merge Sort']
+    options1 = ['Selection Sort', 'Insertion Sort']
     start1 = tk.StringVar(interface)
     sortingLabel = tk.Label(interface, text="Choose sorting method for medical insurance charges: ", bg='lightblue', fg='black', font=('arial', 16))
     sortingLabel.grid(row=1, column=0, padx=10, pady=10, sticky=tk.W)
