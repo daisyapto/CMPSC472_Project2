@@ -4,7 +4,6 @@
 # Sorting functions: selection, merge, and xyz based on user input to compare time took to sort for n threads (sorting.py)
 
 import tkinter as tk
-import tkinter.ttk as ttk
 import pandas as pd
 from sorting import Sorting
 from visual import Visual
@@ -25,9 +24,6 @@ sort = Sorting()
 visual = Visual()
 thread = Thread()
 
-data = pd.read_csv("Train_Data.csv")
-data = data.drop_duplicates()
-
 def displayGraph(interface, figureList, r, c, co): # r = row, c = col, co = counter; simple variable names because when using the global variables, had glitches with multiple function calls
     for item in figureList:
         canvas = FigureCanvasTkAgg(item, master=interface)
@@ -47,6 +43,9 @@ def submitAndProcess(interface, start, start1, start2):
     #print(graphDisplay)
     #print(sortMethod)
     #print(threadCount)
+
+    data = pd.read_csv("Train_Data.csv")
+    data = data.drop_duplicates()
     #print("Has duplicates in charges?: ", data.duplicated(keep=False))
     #print(data.head())
     #print("Min", min(data['charges']))
@@ -54,30 +53,19 @@ def submitAndProcess(interface, start, start1, start2):
 
 
     if graphDisplay == 'Pie Chart':
-        call = thread.callVisualFunction(data, threadCount, 'Pie Chart')
-
+        thread.callVisualFunction(data, threadCount, 'Pie Chart')
         displayGraph(interface, pieGraphFigures, displayRow, displayCol, displayCount)
-        execTime = tk.Label(interface, text=f"Visualization Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
-        execTime.grid(row=1, column=2, padx=10, pady=10)
     elif graphDisplay == 'Line Chart':
-        call = thread.callVisualFunction(data, threadCount, 'Line Chart')
+        thread.callVisualFunction(data, threadCount, 'Line Chart')
         displayGraph(interface, lineGraphFigures, displayRow, displayCol, displayCount)
-        execTime = tk.Label(interface, text=f"Visualization Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
-        execTime.grid(row=1, column=2, padx=10, pady=10)
     elif graphDisplay == 'Bar Chart':
-        call = thread.callVisualFunction(data, threadCount, 'Bar Chart')
+        thread.callVisualFunction(data, threadCount, 'Bar Chart')
         displayGraph(interface, barGraphFigures, displayRow, displayCol, displayCount)
-        execTime = tk.Label(interface, text=f"Visualization Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
-        execTime.grid(row=1, column=2, padx=10, pady=10)
 
     if sortMethod == 'Selection Sort':
-        call = thread.callSortFunction(data, threadCount, 'Selection Sort')
-        execTime = tk.Label(interface, text=f"Sorting Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
-        execTime.grid(row=2, column=2, padx=10, pady=10)
+        thread.callSortFunction(data, threadCount, 'Selection Sort')
     elif sortMethod == 'Insertion Sort':
-        call = thread.callSortFunction(data, threadCount, 'Insertion Sort')
-        execTime = tk.Label(interface, text=f"Sorting Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
-        execTime.grid(row=2, column=2, padx=10, pady=10)
+        thread.callSortFunction(data, threadCount, 'Insertion Sort')
     #elif sortMethod == 'Merge Sort':
         #thread.callSortFunction(data, threadCount, 'Merge Sort')
 
@@ -85,50 +73,32 @@ def main():
     interface = tk.Tk()
     interface.title("Medical Insurance Database")
     interface.configure(bg='lightblue')
-    interface.geometry("1600x1400")
+    interface.geometry("1600x1200")
     interface.attributes('-topmost', True)
 
-    # Ref: Google & Stack Overflow, how to allow notebook to resize with window size
-    interface.columnconfigure(0, weight=1)
-    interface.rowconfigure(0, weight=1)
-
-    notebook = ttk.Notebook(interface)
-    notebook.grid(row=0, column=0, sticky="nsew")
-
-    # Sorting and visualization frame and searching frame
-    sortVisual_frame = tk.Frame(interface, bg="skyblue")
-    search_frame = tk.Frame(interface,  bg="skyblue")
-
-    notebook.add(sortVisual_frame, text="Sorting & Visualization")
-    notebook.add(search_frame, text="Searching")
-
-####### Sorting & Visualization Frame #######
     options = ['Pie Chart', 'Line Chart', 'Bar Chart']
-    start = tk.StringVar(sortVisual_frame)
-    graphLabel = tk.Label(sortVisual_frame, text="Choose visualization of data: ", bg='lightblue', fg='black', font=('arial', 16))
+    start = tk.StringVar(interface)
+    graphLabel = tk.Label(interface, text="Choose visualization of data: ", bg='lightblue', fg='black', font=('arial', 16))
     graphLabel.grid(row=0, column=0, padx=10, pady=10, sticky=tk.W)
-    graph = tk.OptionMenu(sortVisual_frame, start, *options)
+    graph = tk.OptionMenu(interface, start, *options)
     graph.grid(row=0, column=1, padx=10, pady=10, sticky=tk.W)
 
     options1 = ['Selection Sort', 'Insertion Sort']
-    start1 = tk.StringVar(sortVisual_frame)
-    sortingLabel = tk.Label(sortVisual_frame, text="Choose sorting method for medical insurance charges: ", bg='lightblue', fg='black', font=('arial', 16))
+    start1 = tk.StringVar(interface)
+    sortingLabel = tk.Label(interface, text="Choose sorting method for medical insurance charges: ", bg='lightblue', fg='black', font=('arial', 16))
     sortingLabel.grid(row=1, column=0, padx=10, pady=10, sticky=tk.W)
-    sorting = tk.OptionMenu(sortVisual_frame, start1, *options1)
+    sorting = tk.OptionMenu(interface, start1, *options1)
     sorting.grid(row=1, column=1, padx=10, pady=10, sticky=tk.W)
 
     options2 = [2, 4, 8, 16]
-    start2 = tk.StringVar(sortVisual_frame)
-    threadLabel = tk.Label(sortVisual_frame, text="Choose number of threads for the above operations: ", bg='lightblue', fg='black', font=('arial', 16))
+    start2 = tk.StringVar(interface)
+    threadLabel = tk.Label(interface, text="Choose number of threads for the above operations: ", bg='lightblue', fg='black', font=('arial', 16))
     threadLabel.grid(row=2, column=0, padx=10, pady=10, sticky=tk.W)
-    thread = tk.OptionMenu(sortVisual_frame, start2, *options2)
+    thread = tk.OptionMenu(interface, start2, *options2)
     thread.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
 
-    submit = tk.Button(sortVisual_frame, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(sortVisual_frame, start, start1, start2))
+    submit = tk.Button(interface, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(interface, start, start1, start2))
     submit.grid(row=3, column=0, padx=10, pady=10, sticky=tk.W)
-
-####### Search Frame #######
-    # Add Mariami's search tab here
 
     interface.mainloop()
 
