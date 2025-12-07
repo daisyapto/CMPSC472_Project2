@@ -112,9 +112,8 @@ class Visual:
         self.medInsurBarGraph(data, axMed)
 
     def ageLineGraph(self, data, ax):
-        dataSample = data[['age', 'charges']].sample(n=100)
-        age = dataSample['age']
-        cost = dataSample['charges']
+        age = list(data['age'])
+        cost = list(data['charges'])
         data = sorted(zip(age, cost)) # Unsure if we should change this to using one of the algorithms, may make it easier to track time complexity?
         ages, costs = zip(*data)
         self.lock.acquire()
@@ -125,9 +124,8 @@ class Visual:
         self.lock.release()
 
     def bmiLineGraph(self, data, ax):
-        dataSample = data[['bmi', 'charges']].sample(n=100)
-        bmi = dataSample['bmi']
-        cost = dataSample['charges']
+        bmi = list(data['bmi'])
+        cost = list(data['charges'])
         data = sorted(zip(bmi, cost)) # Unsure if we should change this to using one of the algorithms, may make it easier to track time complexity?
         bmis, costs = zip(*data)
         self.lock.acquire()
@@ -138,9 +136,8 @@ class Visual:
         self.lock.release()
 
     def numOfChildrenLineGraph(self, data, ax):
-        dataSample = data[['children', 'charges']].sample(n=100)
-        numOfChildren = dataSample['children']
-        cost = dataSample['charges']
+        numOfChildren = list(data['children'])
+        cost = list(data['charges'])
         data = sorted(zip(numOfChildren, cost)) # Unsure if we should change this to using one of the algorithms, may make it easier to track time complexity?
         numOfChildren, costs = zip(*data)
         self.lock.acquire()
@@ -152,23 +149,24 @@ class Visual:
 
     def drawAllLineGraphs(self, data, axAge_L, axBMI_L, axNumOfChildren_L):
         # The line graphs compare how medical insurance cost increases based on a specific attribute (how insurance cost is affected with age, bmi, and number of children)
-        self.ageLineGraph(data, axAge_L)
-        self.bmiLineGraph(data, axBMI_L)
-        self.numOfChildrenLineGraph(data, axNumOfChildren_L)
+        with self.lock:
+            dataSample = data[['age', 'bmi', 'children', 'charges']].sample(n=100)
+        self.ageLineGraph(dataSample, axAge_L)
+        self.bmiLineGraph(dataSample, axBMI_L)
+        self.numOfChildrenLineGraph(dataSample, axNumOfChildren_L)
 
     def agePieGraph(self, data, ax):
         age = data['age']
-        bounds = [0, 25, 25.01, 35, 35.01, 45, 45.01, 55, 55.01, 65, 65.01, 120]
+        bounds = [0, 25, 25.01, 35, 35.01, 45, 45.01, 55, 55.01, 65]
         countBar1 = age.between(bounds[0], bounds[1]).sum()
         countBar2 = age.between(bounds[2], bounds[3]).sum()
         countBar3 = age.between(bounds[4], bounds[5]).sum()
         countBar4 = age.between(bounds[6], bounds[7]).sum()
         countBar5 = age.between(bounds[8], bounds[9]).sum()
-        countBar6 = age.between(bounds[10], bounds[11]).sum()
-        labels = ["<25", ">25-35", ">35-45", ">45-55", ">55-65", "65+"]
-        ageCounts = [countBar1, countBar2, countBar3, countBar4, countBar5, countBar6]
+        labels = ["<25", ">25-35", ">35-45", ">45-55", ">55-65"]
+        ageCounts = [countBar1, countBar2, countBar3, countBar4, countBar5]
         self.lock.acquire()
-        ax.pie(ageCounts, labels=labels, autopct=lambda val: f'{val*sum(ageCounts)/100:.0f} ({val:.2f}%)', startangle=90) # Reference: google search AI overview, how to get values in pie chart with percentages
+        ax.pie(ageCounts, labels=labels, autopct=lambda val: f'{val*sum(ageCounts)/100:.0f} ({val:.2f}%)', startangle=90, labeldistance=1.2, pctdistance=1) # Reference: google search AI overview, how to get values in pie chart with percentages
         ax.set_title("Age Demographics")
         self.lock.release()
 
@@ -176,7 +174,7 @@ class Visual:
         people = data['sex']
         counts = people.value_counts()
         self.lock.acquire()
-        ax.pie(counts.values, labels=counts.index, autopct=lambda val: f'{val * sum(counts.values) / 100:.0f} ({val:.2f}%)', startangle=90)  # Reference: google search AI overview, how to get values in pie chart with percentages
+        ax.pie(counts.values, labels=counts.index, autopct=lambda val: f'{val * sum(counts.values) / 100:.0f} ({val:.2f}%)', startangle=90, labeldistance=1.2, pctdistance=1)  # Reference: google search AI overview, how to get values in pie chart with percentages
         ax.set_title("Male vs Female")
         self.lock.release()
 
@@ -192,7 +190,7 @@ class Visual:
         labels = ["<18.5", ">18.5-22", ">22-25", ">25-30", "30-32", "32+"]
         bmiCounts = [countBar1, countBar2, countBar3, countBar4, countBar5, countBar6]
         self.lock.acquire()
-        ax.pie(bmiCounts, labels=labels, autopct=lambda val: f'{val * sum(bmiCounts) / 100:.0f} ({val:.2f}%)', startangle=90)  # Reference: google search AI overview, how to get values in pie chart with percentages
+        ax.pie(bmiCounts, labels=labels, autopct=lambda val: f'{val * sum(bmiCounts) / 100:.0f} ({val:.2f}%)', startangle=90, labeldistance=1.2, pctdistance=1)  # Reference: google search AI overview, how to get values in pie chart with percentages
         ax.set_title("BMI Demographics")
         self.lock.release()
 
@@ -200,7 +198,7 @@ class Visual:
         smoker = data['smoker']
         counts = smoker.value_counts()
         self.lock.acquire()
-        ax.pie(counts.values, labels=counts.index, autopct=lambda val: f'{val * sum(counts.values) / 100:.0f} ({val:.2f}%)', startangle=90)  # Reference: google search AI overview, how to get values in pie chart with percentages
+        ax.pie(counts.values, labels=counts.index, autopct=lambda val: f'{val * sum(counts.values) / 100:.0f} ({val:.2f}%)', startangle=90, labeldistance=1.2, pctdistance=1)  # Reference: google search AI overview, how to get values in pie chart with percentages
         ax.set_title("Smoker vs Non-smoker Demographics")
         self.lock.release()
 
@@ -208,7 +206,7 @@ class Visual:
         regions = data['region']
         counts = regions.value_counts()
         self.lock.acquire()
-        ax.pie(counts.values, labels=counts.index, autopct=lambda val: f'{val * sum(counts.values) / 100:.0f} ({val:.2f}%)', startangle=90)  # Reference: google search AI overview, how to get values in pie chart with percentages
+        ax.pie(counts.values, labels=counts.index, autopct=lambda val: f'{val * sum(counts.values) / 100:.0f} ({val:.2f}%)', startangle=90, labeldistance=1.2, pctdistance=1)  # Reference: google search AI overview, how to get values in pie chart with percentages
         ax.set_title("Region Demographics")
         self.lock.release()
 
@@ -216,7 +214,7 @@ class Visual:
         children = data['children']
         counts = children.value_counts()
         self.lock.acquire()
-        ax.pie(counts.values, labels=counts.index, autopct=lambda val: f'{val * sum(counts.values) / 100:.0f} ({val:.2f}%)', startangle=90)  # Reference: google search AI overview, how to get values in pie chart with percentages
+        ax.pie(counts.values, labels=counts.index, autopct=lambda val: f'{val * sum(counts.values) / 100:.0f} ({val:.2f}%)', startangle=90, labeldistance=1.2, pctdistance=1)  # Reference: google search AI overview, how to get values in pie chart with percentages
         ax.set_title("Number of Children Demographics")
         self.lock.release()
 
@@ -234,7 +232,7 @@ class Visual:
         labels = ["<1200.00", ">1200.00 - 10000.00", ">10000.00 - 20000.00", ">20000.00 - 30000.00", ">30000.00 - 40000.00", ">40000.00 - 50000.00", ">50000.00 - 60000.00", "60000.00+"]
         medCounts = [countBar1, countBar2, countBar3, countBar4, countBar5, countBar6, countBar7, countBar8]
         self.lock.acquire()
-        ax.pie(medCounts, labels=labels, autopct=lambda val: f'{val * sum(medCounts) / 100:.0f} ({val:.2f}%)', startangle=90)  # Reference: google search AI overview, how to get values in pie chart with percentages
+        ax.pie(medCounts, labels=labels, autopct=lambda val: f'{val * sum(medCounts) / 100:.0f} ({val:.2f}%)', startangle=135, labeldistance=1.2, pctdistance=.8)  # Reference: google search AI overview, how to get values in pie chart with percentages
         ax.set_title("Medical Insurance Cost Demographics")
         self.lock.release()
 

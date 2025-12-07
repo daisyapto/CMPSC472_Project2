@@ -4,14 +4,55 @@
 
 import threading
 import time
+import tkinter
+
 from visual import Visual
 from sorting import Sorting
 import numpy as np
 from matplotlib import pyplot as plt
 import heapq
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 sort = Sorting()
 visual = Visual()
+
+figAge_B = Figure((4, 4), dpi=100)
+axAge_B = figAge_B.add_subplot(111)
+figMF_B = Figure((4, 4), dpi=100)
+axMF_B = figMF_B.add_subplot(111)
+figBMI_B = Figure((4, 4), dpi=100)
+axBMI_B = figBMI_B.add_subplot(111)
+figSmoker_B = Figure((4, 4), dpi=100)
+axSmoker_B = figSmoker_B.add_subplot(111)
+figRegion_B = Figure((4, 4), dpi=100)
+axRegion_B = figRegion_B.add_subplot(111)
+figNumOfChildren_B = Figure((4, 4), dpi=100)
+axNumOfChildren_B = figNumOfChildren_B.add_subplot(111)
+figMed_B = Figure((4, 4), dpi=100)
+axMed_B = figMed_B.add_subplot(111)
+
+figAge_L = Figure((4,4), dpi=100)
+axAge_L = figAge_L.add_subplot(111)
+figBMI_L = Figure((4,4), dpi=100)
+axBMI_L = figBMI_L.add_subplot(111)
+figNumOfChildren_L = Figure((4,4), dpi=100)
+axNumOfChildren_L = figNumOfChildren_L.add_subplot(111)
+
+figAge_P = Figure((4,4), dpi=100)
+axAge_P = figAge_P.add_subplot(111)
+figMF_P = Figure((4,4), dpi=100)
+axMF_P = figMF_P.add_subplot(111)
+figBMI_P = Figure((4,4), dpi=100)
+axBMI_P = figBMI_P.add_subplot(111)
+figSmoker_P = Figure((4,4), dpi=100)
+axSmoker_P = figSmoker_P.add_subplot(111)
+figRegion_P = Figure((4,4), dpi=100)
+axRegion_P = figRegion_P.add_subplot(111)
+figNumOfChildren_P = Figure((4,4), dpi=100)
+axNumOfChildren_P = figNumOfChildren_P.add_subplot(111)
+figMed_P = Figure((4,4), dpi=100)
+axMed_P = figMed_P.add_subplot(111)
 
 class Thread:
     def callSortFunction(self, data, numOfThreads, functionName):
@@ -69,27 +110,6 @@ class Thread:
 
     def callVisualFunction(self, data, numOfThreads, functionName):
         threads = []
-        if functionName == 'Bar Chart':
-            figAge_B, axAge_B = plt.subplots()
-            figMF_B, axMF_B = plt.subplots()
-            figBMI_B, axBMI_B = plt.subplots()
-            figSmoker_B, axSmoker_B = plt.subplots()
-            figRegion_B, axRegion_B = plt.subplots()
-            figNumOfChildren_B, axNumOfChildren_B = plt.subplots()
-            figMed_B, axMed_B = plt.subplots()
-        elif functionName == 'Line Chart':
-            figAge_L, axAge_L = plt.subplots()
-            figBMI_L, axBMI_L = plt.subplots()
-            figNumOfChildren_L, axNumOfChildren_L = plt.subplots()
-        elif functionName == 'Pie Chart':
-            figAge_P, axAge_P = plt.subplots()
-            figMF_P, axMF_P = plt.subplots()
-            figBMI_P, axBMI_P = plt.subplots()
-            figSmoker_P, axSmoker_P = plt.subplots()
-            figRegion_P, axRegion_P = plt.subplots()
-            figNumOfChildren_P, axNumOfChildren_P = plt.subplots()
-            figMed_P, axMed_P = plt.subplots()
-
         start = time.perf_counter_ns()
         # print("DATA SPLIT", dataSplit)
         for i in range(numOfThreads):
@@ -110,7 +130,8 @@ class Thread:
                 threads.append(thread)
         for thread in threads:
             thread.join()
-        plt.show()
+        # Add Figures to tkinter in main
+        # plt.show()
         end = time.perf_counter_ns()
         print(f"-------- {numOfThreads} Threads running {functionName} function -------")
         print("Execution Time: ", end - start)

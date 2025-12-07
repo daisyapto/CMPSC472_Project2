@@ -3,21 +3,40 @@
 # Threading functions and timing (threadingFuncs.py)
 # Sorting functions: selection, merge, and xyz based on user input to compare time took to sort for n threads (sorting.py)
 
-import time
-import matplotlib
 import tkinter as tk
-from tkinter import ttk
 import pandas as pd
-import threading
 from sorting import Sorting
 from visual import Visual
 from threadingFuncs import Thread
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from threadingFuncs import (figAge_B, figMF_B, figBMI_B, figSmoker_B, figRegion_B, figNumOfChildren_B, figMed_B,
+    figAge_L, figBMI_L, figNumOfChildren_L,
+    figAge_P, figMF_P, figBMI_P, figSmoker_P, figRegion_P, figNumOfChildren_P, figMed_P)
+
+barGraphFigures = [figAge_B, figMF_B, figBMI_B, figSmoker_B, figRegion_B, figNumOfChildren_B, figMed_B]
+lineGraphFigures = [figAge_L, figBMI_L, figNumOfChildren_L]
+pieGraphFigures = [figAge_P, figMF_P, figBMI_P, figSmoker_P, figRegion_P, figNumOfChildren_P, figMed_P]
+displayRow = 4
+displayCol = 0
+displayCount = 0
 
 sort = Sorting()
 visual = Visual()
 thread = Thread()
 
-def submitAndProcess(start, start1, start2):
+def displayGraph(interface, figureList, r, c, co): # r = row, c = col, co = counter; simple variable names because when using the global variables, had glitches with multiple function calls
+    for item in figureList:
+        canvas = FigureCanvasTkAgg(item, master=interface)
+        canvasWidget = canvas.get_tk_widget()
+        if co == 4:
+            r += 1
+        if co == 4:
+            c = 0
+        canvasWidget.grid(row=r, column=c, padx=10, pady=10, sticky=tk.W)
+        c += 1
+        co += 1
+
+def submitAndProcess(interface, start, start1, start2):
     graphDisplay = start.get()
     sortMethod = start1.get()
     threadCount = int(start2.get())
@@ -27,7 +46,7 @@ def submitAndProcess(start, start1, start2):
 
     data = pd.read_csv("Train_Data.csv")
     data = data.drop_duplicates()
-    print("Has duplicates in charges?: ", data.duplicated(keep=False))
+    #print("Has duplicates in charges?: ", data.duplicated(keep=False))
     #print(data.head())
     #print("Min", min(data['charges']))
     #print("Max", max(data['charges']))
@@ -35,10 +54,13 @@ def submitAndProcess(start, start1, start2):
 
     if graphDisplay == 'Pie Chart':
         thread.callVisualFunction(data, threadCount, 'Pie Chart')
+        displayGraph(interface, pieGraphFigures, displayRow, displayCol, displayCount)
     elif graphDisplay == 'Line Chart':
         thread.callVisualFunction(data, threadCount, 'Line Chart')
+        displayGraph(interface, lineGraphFigures, displayRow, displayCol, displayCount)
     elif graphDisplay == 'Bar Chart':
         thread.callVisualFunction(data, threadCount, 'Bar Chart')
+        displayGraph(interface, barGraphFigures, displayRow, displayCol, displayCount)
 
     if sortMethod == 'Selection Sort':
         thread.callSortFunction(data, threadCount, 'Selection Sort')
@@ -49,9 +71,9 @@ def submitAndProcess(start, start1, start2):
 
 def main():
     interface = tk.Tk()
-    interface.geometry("800x600")
     interface.title("Medical Insurance Database")
     interface.configure(bg='lightblue')
+    interface.geometry("1600x1200")
     interface.attributes('-topmost', True)
 
     options = ['Pie Chart', 'Line Chart', 'Bar Chart']
@@ -70,12 +92,12 @@ def main():
 
     options2 = [2, 4, 8, 16]
     start2 = tk.StringVar(interface)
-    threadLabel = tk.Label(interface, text="Choose number of threads for the above operations: ", bg='lightblue',fg='black', font=('arial', 16))
+    threadLabel = tk.Label(interface, text="Choose number of threads for the above operations: ", bg='lightblue', fg='black', font=('arial', 16))
     threadLabel.grid(row=2, column=0, padx=10, pady=10, sticky=tk.W)
     thread = tk.OptionMenu(interface, start2, *options2)
     thread.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
 
-    submit = tk.Button(interface, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(start, start1, start2))
+    submit = tk.Button(interface, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(interface, start, start1, start2))
     submit.grid(row=3, column=0, padx=10, pady=10, sticky=tk.W)
 
     interface.mainloop()
