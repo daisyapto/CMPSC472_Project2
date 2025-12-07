@@ -107,6 +107,7 @@ class Thread:
             print("Insertion Sort: ", sortedMedChargesInsertion)
         #elif functionName == 'Merge Sort':
             #print("Merge Sort: ", sortedMedChargesMerge)
+        return (end - start)
 
     def callVisualFunction(self, data, numOfThreads, functionName):
         threads = []
@@ -135,6 +136,7 @@ class Thread:
         end = time.perf_counter_ns()
         print(f"-------- {numOfThreads} Threads running {functionName} function -------")
         print("Execution Time: ", end - start)
+        return (end - start)
 
     def dataChunk(self, data, numOfThreads):
         dataChunks = np.array_split(data, numOfThreads)
