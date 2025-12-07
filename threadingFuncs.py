@@ -9,10 +9,10 @@ import tkinter
 from visual import Visual
 from sorting import Sorting
 import numpy as np
-from matplotlib import pyplot as plt
 import heapq
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import pandas as pd
+import concurrent.futures
 
 sort = Sorting()
 visual = Visual()
@@ -141,6 +141,83 @@ class Thread:
     def dataChunk(self, data, numOfThreads):
         dataChunks = np.array_split(data, numOfThreads)
         return dataChunks
+
+    def lineSearch(self, data, searchBy, searchInfo): # No thread use
+        foundElements = []
+        for idx, row in data.iterrows():
+            if row[searchBy] == searchInfo:
+                foundElements.append(row)
+        return pd.DataFrame(foundElements)
+
+
+    def multitLinearSearch(self, data, numOfThreads, searchBy, searchInfo): # Thread use
+        rows = len(data)
+        foundElements =[]
+        lock = threading.Lock()
+        chunks = self.dataChunk(data, numOfThreads)
+        def threadSearch(chunk):
+            for idx, row in chunk.iterrows():
+                if str(row[searchBy]) == str(searchInfo):
+                    lock.acquire()
+                    foundElements.append(row)
+                    lock.release()
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=numOfThreads) as executor:
+            for chunk in chunks:
+                executor.submit(threadSearch, chunk)
+
+
+        return pd.DataFrame(foundElements)
+
+    '''
+    def binarySearch(self,data, numOfThreads, searchBy, searchInfo):
+        sortedData = thread.callSortFunction(data, numOfThreads, "Insertion Sort")
+        low = 0
+        high = len(sortedData) - 1
+
+        while low <= high:
+            mid = low + (high - low) // 2
+
+            if sortedData[mid] < x:
+                low = mid + 1
+            elif sortedData[mid] > x:
+                high = mid - 1
+            else:
+                return mid
+        return -1'''
+
+    def multitBinarySearch(self, data, numOfThreads, searchBy, searchInfo):
+        foundElements = []
+        lock = threading.Lock()
+
+        # Binary requires sorted data
+        sortedData = data.sort_values(by=searchBy).reset_index(drop=True)
+
+        chunks = self.dataChunk(sortedData, numOfThreads)
+
+        def threadSearch(chunk):
+            low = 0
+            high = len(chunk) - 1
+
+            while low <= high:
+                mid = (low + high) // 2
+                value = chunk.loc[mid, searchBy]
+
+                if str(value) < str(searchInfo):
+                    low = mid + 1
+                elif str(value) > str(searchInfo):
+                    high = mid - 1
+                else:
+                    # Lock before modifying shared list
+                    lock.acquire()
+                    foundElements.append(chunk.iloc[mid])
+                    lock.relase ()
+                    return  # exit thread
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=numOfThreads) as executor:
+            executor.map(threadSearch, chunks)
+
+        return pd.DataFrame(foundElements)
 
 
 """
