@@ -21,26 +21,30 @@ class Sorting:
         self.lock.release()
 
     # Reference: https://www.w3schools.com/dsa/dsa_algo_insertionsort.php
+    # Haven't tried optimized solution at link but this was the basic implementation I used to modify the bug
     def insertionSort(self, data, globalList):
-        charges = list(data['charges'])
+        charges = list(data['charges']) # Convert dataframe column into standard list
         for i in range(1, len(charges)):
-            insertValue = i
-            currentCharge = charges.pop(i)
-            for j in range (i-1, 0, -1):
-                if charges[j] <= currentCharge:
-                    insertValue = j
-            charges.insert(insertValue, currentCharge)
+            insertValue = i # Insert at i (not moving) when element is already larger than everything before it
+            currentCharge = charges.pop(i) # Extract current element
+            for j in range (i-1, -1, -1): # Iterate backwards from 1 position behind current position in list
+                if charges[j] > currentCharge: # Compare through all elements behind it
+                    insertValue = j # Update insertion value every time the element is smaller than an element behind it
+            charges.insert(insertValue, currentCharge) # Insert with most updated insertValue at the end of loop
 
         self.lock.acquire()
         globalList.extend([charges])
         self.lock.release()
 
+    """ No longer needed, using heapq merge instead 
     def listMerging(self, list1, list2):
         # Had an idea
         # Was having an issue where selection sort was return two sorted halves when 2 threads were used for example [1, 2, 4, 3, 5, 6], so it reminded of the merge mergesort function
         # Used it in selection sort to produce the proper results
         # Note -- does not fully work yet
         result = []
+        print(len(list1))
+        print(len(list2))
         for i in range(min(len(list1), len(list2))):
             if list1[i] <= list2[i]:
                 result.append(list1[i])
@@ -49,8 +53,7 @@ class Sorting:
                 result.append(list2[i])
                 result.append(list1[i])
         return result
-
-
+    """
 
     """ Unsure if using merge sort
     def merge(self, data, left, middle, right):

@@ -26,6 +26,8 @@ def submitAndProcess(start, start1, start2):
     #print(threadCount)
 
     data = pd.read_csv("Train_Data.csv")
+    data = data.drop_duplicates()
+    print("Has duplicates in charges?: ", data.duplicated(keep=False))
     #print(data.head())
     #print("Min", min(data['charges']))
     #print("Max", max(data['charges']))

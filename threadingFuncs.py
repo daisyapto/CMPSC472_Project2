@@ -8,6 +8,7 @@ from visual import Visual
 from sorting import Sorting
 import numpy as np
 from matplotlib import pyplot as plt
+import heapq
 
 sort = Sorting()
 visual = Visual()
@@ -45,95 +46,16 @@ class Thread:
         if functionName == 'Selection Sort':
             #print("Before", sortedMedChargesSelection)
             #print("Length", len(sortedMedChargesSelection))
-            if numOfThreads == 2:
-                sortedMedChargesSelection = sort.listMerging(sortedMedChargesSelection[0], sortedMedChargesSelection[1])
-            if numOfThreads == 4:
-                # Unsure how to efficiently merge when there are more chunks than 2, this seems inefficient but it does seem to work (?)
-                sortedMedChargesSelection1 = sort.listMerging(sortedMedChargesSelection[0], sortedMedChargesSelection[1])
-                sortedMedChargesSelection2 = sort.listMerging(sortedMedChargesSelection[2], sortedMedChargesSelection[3])
-                sortedMedChargesSelection = sort.listMerging(sortedMedChargesSelection1, sortedMedChargesSelection2)
-            if numOfThreads == 8:
-                # Unsure how to efficiently merge when there are more chunks than 2, this seems inefficient but it does seem to work (?)
-                # Must merge 2 lists at a time, unsure how to modify the listMerging function to merge k lists
-                sortedMedChargesSelection1 = sort.listMerging(sortedMedChargesSelection[0], sortedMedChargesSelection[1])
-                sortedMedChargesSelection2 = sort.listMerging(sortedMedChargesSelection[2], sortedMedChargesSelection[3])
-                sortedMedChargesSelection3 = sort.listMerging(sortedMedChargesSelection[4], sortedMedChargesSelection[5])
-                sortedMedChargesSelection4 = sort.listMerging(sortedMedChargesSelection[6], sortedMedChargesSelection[7])
-
-                sortedMedChargesSelection1_2 = sort.listMerging(sortedMedChargesSelection1, sortedMedChargesSelection2)
-                sortedMedChargesSelection3_4 = sort.listMerging(sortedMedChargesSelection3, sortedMedChargesSelection4)
-
-                sortedMedChargesSelection = sort.listMerging(sortedMedChargesSelection1_2, sortedMedChargesSelection3_4)
-            if numOfThreads == 16:
-                sortedMedChargesSelection1 = sort.listMerging(sortedMedChargesSelection[0], sortedMedChargesSelection[1])
-                sortedMedChargesSelection2 = sort.listMerging(sortedMedChargesSelection[2], sortedMedChargesSelection[3])
-                sortedMedChargesSelection3 = sort.listMerging(sortedMedChargesSelection[4], sortedMedChargesSelection[5])
-                sortedMedChargesSelection4 = sort.listMerging(sortedMedChargesSelection[6], sortedMedChargesSelection[7])
-                sortedMedChargesSelection5 = sort.listMerging(sortedMedChargesSelection[8], sortedMedChargesSelection[9])
-                sortedMedChargesSelection6 = sort.listMerging(sortedMedChargesSelection[10], sortedMedChargesSelection[11])
-                sortedMedChargesSelection7 = sort.listMerging(sortedMedChargesSelection[12], sortedMedChargesSelection[13])
-                sortedMedChargesSelection8 = sort.listMerging(sortedMedChargesSelection[14], sortedMedChargesSelection[15])
-
-                sortedMedChargesSelection1_2 = sort.listMerging(sortedMedChargesSelection1, sortedMedChargesSelection2)
-                sortedMedChargesSelection3_4 = sort.listMerging(sortedMedChargesSelection3, sortedMedChargesSelection4)
-                sortedMedChargesSelection5_6 = sort.listMerging(sortedMedChargesSelection5, sortedMedChargesSelection6)
-                sortedMedChargesSelection7_8 = sort.listMerging(sortedMedChargesSelection7, sortedMedChargesSelection8)
-
-                sortedMedChargesSelection1_4 = sort.listMerging(sortedMedChargesSelection1_2, sortedMedChargesSelection3_4)
-                sortedMedChargesSelection5_8 = sort.listMerging(sortedMedChargesSelection5_6, sortedMedChargesSelection7_8)
-
-                sortedMedChargesSelection = sort.listMerging(sortedMedChargesSelection1_4, sortedMedChargesSelection5_8)
+            sortedMedChargesSelection = list(heapq.merge(*sortedMedChargesSelection))
             #print("After", sortedMedChargesSelection)
             #print("Length", len(sortedMedChargesSelection))
-
-
 
         if functionName == 'Insertion Sort':
             #print("Before", sortedMedChargesInsertion)
             #print("Length", len(sortedMedChargesInsertion))
-            if numOfThreads == 2:
-                sortedMedChargesInsertion = sort.listMerging(sortedMedChargesInsertion[0], sortedMedChargesInsertion[1])
-            if numOfThreads == 4:
-                # Unsure how to efficiently merge when there are more chunks than 2, this seems inefficient but it does seem to work (?)
-                sortedMedChargesInsertion1 = sort.listMerging(sortedMedChargesInsertion[0], sortedMedChargesInsertion[1])
-                sortedMedChargesInsertion2 = sort.listMerging(sortedMedChargesInsertion[2], sortedMedChargesInsertion[3])
-                sortedMedChargesInsertion = sort.listMerging(sortedMedChargesInsertion1, sortedMedChargesInsertion2)
-            if numOfThreads == 8:
-                # Unsure how to efficiently merge when there are more chunks than 2, this seems inefficient but it does seem to work (?)
-                # Must merge 2 lists at a time, unsure how to modify the listMerging function to merge k lists
-                sortedMedChargesInsertion1 = sort.listMerging(sortedMedChargesInsertion[0], sortedMedChargesInsertion[1])
-                sortedMedChargesInsertion2 = sort.listMerging(sortedMedChargesInsertion[2], sortedMedChargesInsertion[3])
-                sortedMedChargesInsertion3 = sort.listMerging(sortedMedChargesInsertion[4], sortedMedChargesInsertion[5])
-                sortedMedChargesInsertion4 = sort.listMerging(sortedMedChargesInsertion[6], sortedMedChargesInsertion[7])
-
-                sortedMedChargesInsertion1_2 = sort.listMerging(sortedMedChargesInsertion1, sortedMedChargesInsertion2)
-                sortedMedChargesInsertion3_4 = sort.listMerging(sortedMedChargesInsertion3, sortedMedChargesInsertion4)
-
-                sortedMedChargesInsertion = sort.listMerging(sortedMedChargesInsertion1_2, sortedMedChargesInsertion3_4)
-            if numOfThreads == 16:
-                sortedMedChargesInsertion1 = sort.listMerging(sortedMedChargesInsertion[0], sortedMedChargesInsertion[1])
-                sortedMedChargesInsertion2 = sort.listMerging(sortedMedChargesInsertion[2], sortedMedChargesInsertion[3])
-                sortedMedChargesInsertion3 = sort.listMerging(sortedMedChargesInsertion[4], sortedMedChargesInsertion[5])
-                sortedMedChargesInsertion4 = sort.listMerging(sortedMedChargesInsertion[6], sortedMedChargesInsertion[7])
-                sortedMedChargesInsertion5 = sort.listMerging(sortedMedChargesInsertion[8], sortedMedChargesInsertion[9])
-                sortedMedChargesInsertion6 = sort.listMerging(sortedMedChargesInsertion[10], sortedMedChargesInsertion[11])
-                sortedMedChargesInsertion7 = sort.listMerging(sortedMedChargesInsertion[12], sortedMedChargesInsertion[13])
-                sortedMedChargesInsertion8 = sort.listMerging(sortedMedChargesInsertion[14], sortedMedChargesInsertion[15])
-
-                sortedMedChargesInsertion1_2 = sort.listMerging(sortedMedChargesInsertion1, sortedMedChargesInsertion2)
-                sortedMedChargesInsertion3_4 = sort.listMerging(sortedMedChargesInsertion3, sortedMedChargesInsertion4)
-                sortedMedChargesInsertion5_6 = sort.listMerging(sortedMedChargesInsertion5, sortedMedChargesInsertion6)
-                sortedMedChargesInsertion7_8 = sort.listMerging(sortedMedChargesInsertion7, sortedMedChargesInsertion8)
-
-                sortedMedChargesInsertion1_4 = sort.listMerging(sortedMedChargesInsertion1_2, sortedMedChargesInsertion3_4)
-                sortedMedChargesInsertion5_8 = sort.listMerging(sortedMedChargesInsertion5_6, sortedMedChargesInsertion7_8)
-
-                sortedMedChargesInsertion = sort.listMerging(sortedMedChargesInsertion1_4, sortedMedChargesInsertion5_8)
+            sortedMedChargesInsertion = list(heapq.merge(*sortedMedChargesInsertion))
             #print("After", sortedMedChargesInsertion)
             #print("Length", len(sortedMedChargesInsertion))
-
-
-
 
         end = time.perf_counter_ns()
         print(f"-------- {numOfThreads} Threads running '{functionName}' sorting function -------")
