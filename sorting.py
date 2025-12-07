@@ -3,26 +3,30 @@
 # Sorting functions: selection, merge, and xyz based on user input to compare time took to sort for n threads (sorting.py)
 
 import threading
-
+import pandas as pd
 class Sorting:
 
     def __init__(self):
         self.lock = threading.Lock()
 
-    def selectionSort(self, data, globalList):
-        charges = list(data['charges'])
+    def selectionSort(self, data, sortBY, globalList): # i changed selection to test stuff, i think slectiono might be okay its how were combine the lists at the end
+        # i think there is pd.DataFrame(data) build in fucntion
+        charges = data.values.tolist()
+        d = data.columns.get_loc(sortBY)
         for i in range (len(charges)):
-            for j in range (i+1, len(charges), -1):
-                if charges[j] < charges[i]:
-                    charges[j], charges[i] = charges[i], charges[j]
+            min_index = i
+            for j in range (i+1, len(charges)):
+                if charges[j][d] < charges[i][d]:
+                    min_index = j
+            charges[i], charges[min_index] = charges[min_index], charges[i]
 
         self.lock.acquire()
         globalList.extend([charges])
         self.lock.release()
 
     # Reference: https://www.w3schools.com/dsa/dsa_algo_insertionsort.php
-    def insertionSort(self, data, globalList):
-        charges = list(data['charges'])
+    def insertionSort(self, data, sortBY, globalList):
+        charges = list(data[sortBY])
         for i in range(1, len(charges)):
             insertValue = i
             currentCharge = charges.pop(i)
@@ -50,16 +54,14 @@ class Sorting:
                 result.append(list1[i])
         return result
 
-
-
     """ Unsure if using merge sort
-    def merge(self, data, left, middle, right):
-        left = 0
+        def merge(self, data, left, middle, right):
+            left = 0
 
-    def mergeSort(self, data, globalList):
-        charges=1 # Placeholder
-        #...
-        self.lock.acquire()
-        globalList.extend([charges])
-        self.lock.release()
-    """
+        def mergeSort(self, data, globalList):
+            charges=1 # Placeholder
+            #...
+            self.lock.acquire()
+            globalList.extend([charges])
+            self.lock.release()
+        """
