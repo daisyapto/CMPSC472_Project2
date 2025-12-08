@@ -66,11 +66,11 @@ def on_filter_selected(filter_vars, filter_dropdowns, search_threads_var, search
     update_table(filtered_df, results_table)
     time_label.config(text=f"Execution Time: {totalTime:,} ns", font=("Arial", 16))
 
-def update_table(df, results_table):
-    for row in results_table.get_children():
-        results_table.delete(row)
+def update_table(df, table):
+    for row in table.get_children():
+        table.delete(row)
     for i, row in df.iterrows():
-        results_table.insert(
+        table.insert(
             "", "end",
             values=(
                 i,
@@ -96,10 +96,22 @@ def displayGraph(interface, figureList, r, c, co): # r = row, c = col, co = coun
         c += 1
         co += 1
 
-def submitAndProcess(interface, start, start1, start2):
-    graphDisplay = start.get()
-    sortMethod = start1.get()
-    threadCount = int(start2.get())
+def displaySortedTableOutsideSelectionInsertionSort(sorted, sort_frame):
+    columns = ("Index", "Age", "Sex", "BMI", "Children", "Smoker", "Region", "Charges")
+    sort_table = ttk.Treeview(sort_frame, columns=columns, show="headings")
+    sort_table.grid(row=3, column=0, padx=10, pady=10, sticky="sw")
+    for col in columns:
+        sort_table.heading(col, text=col)
+        sort_table.column(col, anchor="center", width=100)
+    # Reference: Google search overview - how to sort a dataframe by a certain column
+    # Since this sorted table is just for display purposes, use built in sort and do not count towards selection/insertion sort threads execution time
+    sortedData = sorted.sort_values(by='charges')
+    update_table(sortedData, sort_table)
+
+
+def submitAndProcess(interface, functionCall, threadAmount):
+    function = functionCall.get()
+    threadCount = int(threadAmount.get())
     #print(graphDisplay)
     #print(sortMethod)
     #print(threadCount)
@@ -109,33 +121,31 @@ def submitAndProcess(interface, start, start1, start2):
     #print("Max", max(data['charges']))
 
 
-    if graphDisplay == 'Pie Chart':
+    if function == 'Pie Chart':
         call = thread.callVisualFunction(data, threadCount, 'Pie Chart')
-
         displayGraph(interface, pieGraphFigures, displayRow, displayCol, displayCount)
         execTime = tk.Label(interface, text=f"Visualization Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
         execTime.grid(row=1, column=2, padx=10, pady=10)
-    elif graphDisplay == 'Line Chart':
+    elif function == 'Line Chart':
         call = thread.callVisualFunction(data, threadCount, 'Line Chart')
         displayGraph(interface, lineGraphFigures, displayRow, displayCol, displayCount)
         execTime = tk.Label(interface, text=f"Visualization Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
         execTime.grid(row=1, column=2, padx=10, pady=10)
-    elif graphDisplay == 'Bar Chart':
+    elif function == 'Bar Chart':
         call = thread.callVisualFunction(data, threadCount, 'Bar Chart')
         displayGraph(interface, barGraphFigures, displayRow, displayCol, displayCount)
         execTime = tk.Label(interface, text=f"Visualization Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
         execTime.grid(row=1, column=2, padx=10, pady=10)
-
-    if sortMethod == 'Selection Sort':
+    elif function == 'Selection Sort':
         call = thread.callSortFunction(data, threadCount, 'Selection Sort')
         execTime = tk.Label(interface, text=f"Sorting Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
-        execTime.grid(row=2, column=2, padx=10, pady=10)
-    elif sortMethod == 'Insertion Sort':
+        execTime.grid(row=1, column=2, padx=10, pady=10)
+        displaySortedTableOutsideSelectionInsertionSort(data, interface)
+    elif function == 'Insertion Sort':
         call = thread.callSortFunction(data, threadCount, 'Insertion Sort')
         execTime = tk.Label(interface, text=f"Sorting Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
-        execTime.grid(row=2, column=2, padx=10, pady=10)
-    #elif sortMethod == 'Merge Sort':
-        #thread.callSortFunction(data, threadCount, 'Merge Sort')
+        execTime.grid(row=1, column=2, padx=10, pady=10)
+        displaySortedTableOutsideSelectionInsertionSort(data, interface)
 
 def main():
     interface = tk.Tk()
@@ -152,39 +162,53 @@ def main():
     notebook.grid(row=0, column=0, sticky="nsew")
 
     # Sorting and visualization frame and searching frame
-    sortVisual_frame = tk.Frame(interface, bg="skyblue")
+    visual_frame = tk.Frame(interface, bg="skyblue")
     search_frame = tk.Frame(interface,  bg="skyblue")
+    sort_frame = tk.Frame(interface, bg="skyblue")
     # Configures to use whole windows
     search_frame.columnconfigure(0, weight=1)
     search_frame.rowconfigure(0, weight=1)
 
-    notebook.add(sortVisual_frame, text="Sorting & Visualization")
-    notebook.add(search_frame, text="Searching")
 
-####### Sorting & Visualization Frame #######
-    options = ['Pie Chart', 'Line Chart', 'Bar Chart']
-    start = tk.StringVar(sortVisual_frame)
-    graphLabel = tk.Label(sortVisual_frame, text="Choose visualization of data: ", bg='lightblue', fg='black', font=('arial', 16))
+    notebook.add(visual_frame, text="Visualization")
+    notebook.add(search_frame, text="Search")
+    notebook.add(sort_frame, text="Sort")
+
+####### Sorting & Visualization Frames #######
+
+    # Visual
+    graphs = ['Pie Chart', 'Line Chart', 'Bar Chart']
+    graphVar = tk.StringVar(visual_frame)
+    graphLabel = tk.Label(visual_frame, text="Choose visualization of data: ", bg='lightblue', fg='black', font=('arial', 16))
     graphLabel.grid(row=0, column=0, padx=10, pady=10, sticky=tk.W)
-    graph = tk.OptionMenu(sortVisual_frame, start, *options)
+    graph = tk.OptionMenu(visual_frame, graphVar, *graphs)
     graph.grid(row=0, column=1, padx=10, pady=10, sticky=tk.W)
 
-    options1 = ['Selection Sort', 'Insertion Sort']
-    start1 = tk.StringVar(sortVisual_frame)
-    sortingLabel = tk.Label(sortVisual_frame, text="Choose sorting method for medical insurance charges: ", bg='lightblue', fg='black', font=('arial', 16))
+    threads1 = [2, 4, 8, 16]
+    threadVar1 = tk.StringVar(visual_frame)
+    threadLabel = tk.Label(visual_frame, text="Choose number of threads for the above operations: ", bg='lightblue', fg='black', font=('arial', 16))
+    threadLabel.grid(row=2, column=0, padx=10, pady=10, sticky=tk.W)
+    threadMenu1 = tk.OptionMenu(visual_frame, threadVar1, *threads1)
+    threadMenu1.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
+    submitGraph = tk.Button(visual_frame, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(visual_frame, graphVar, threadVar1))
+    submitGraph.grid(row=3, column=0, padx=10, pady=10, sticky=tk.W)
+
+    # Sort
+    sorts = ['Selection Sort', 'Insertion Sort']
+    sortVar = tk.StringVar(sort_frame)
+    sortingLabel = tk.Label(sort_frame, text="Choose sorting method for medical insurance charges: ", bg='lightblue', fg='black', font=('arial', 16))
     sortingLabel.grid(row=1, column=0, padx=10, pady=10, sticky=tk.W)
-    sorting = tk.OptionMenu(sortVisual_frame, start1, *options1)
+    sorting = tk.OptionMenu(sort_frame, sortVar, *sorts)
     sorting.grid(row=1, column=1, padx=10, pady=10, sticky=tk.W)
 
-    options2 = [2, 4, 8, 16]
-    start2 = tk.StringVar(sortVisual_frame)
-    threadLabel = tk.Label(sortVisual_frame, text="Choose number of threads for the above operations: ", bg='lightblue', fg='black', font=('arial', 16))
+    threads2 = [2, 4, 8, 16]
+    threadVar2 = tk.StringVar(sort_frame)
+    threadLabel = tk.Label(sort_frame, text="Choose number of threads for the above operations: ", bg='lightblue', fg='black', font=('arial', 16))
     threadLabel.grid(row=2, column=0, padx=10, pady=10, sticky=tk.W)
-    thread = tk.OptionMenu(sortVisual_frame, start2, *options2)
-    thread.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
-
-    submit = tk.Button(sortVisual_frame, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(sortVisual_frame, start, start1, start2))
-    submit.grid(row=3, column=0, padx=10, pady=10, sticky=tk.W)
+    threadMenu2 = tk.OptionMenu(sort_frame, threadVar2, *threads2)
+    threadMenu2.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
+    submitSort = tk.Button(sort_frame, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(sort_frame, sortVar, threadVar2))
+    submitSort.grid(row=3, column=0, padx=10, pady=10, sticky=tk.W)
 
 ####### Search Frame #######
     filter_vars = {}  # store the variable for each filter (checkbox)
