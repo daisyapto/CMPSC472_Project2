@@ -108,6 +108,8 @@ def displaySortedTableOutsideSelectionInsertionSort(sorted, sort_frame):
     sortedData = sorted.sort_values(by='charges')
     update_table(sortedData, sort_table)
 
+# Unsure if we should use this method to remove previous generated graphs
+# Ref: Google - how to check grid information in tkinter without element names
 def clearPreviousGraphs(interface):
     for item in interface.winfo_children():
         gridSpot = item.grid_info()
