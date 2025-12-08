@@ -107,7 +107,7 @@ class Thread:
             print("Insertion Sort: ", sortedMedChargesInsertion)
         #elif functionName == 'Merge Sort':
             #print("Merge Sort: ", sortedMedChargesMerge)
-        return (end - start)
+        return (end - start), sortedMedChargesSelection, sortedMedChargesInsertion
 
     def callVisualFunction(self, data, numOfThreads, functionName):
         threads = []

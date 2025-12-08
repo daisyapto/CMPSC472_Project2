@@ -112,11 +112,14 @@ class Visual:
         self.medInsurBarGraph(data, axMed)
 
     def ageLineGraph(self, data, ax):
+        self.lock.acquire()
+        data = data.sample(n=100)
+        self.lock.release()
         age = list(data['age'])
         cost = list(data['charges'])
+        self.lock.acquire()
         data = sorted(zip(age, cost)) # Unsure if we should change this to using one of the algorithms, may make it easier to track time complexity?
         ages, costs = zip(*data)
-        self.lock.acquire()
         ax.plot(ages, costs)
         ax.set_title("Age vs Medical Insurance Cost")
         ax.set_xlabel("Age")
@@ -124,11 +127,14 @@ class Visual:
         self.lock.release()
 
     def bmiLineGraph(self, data, ax):
+        self.lock.acquire()
+        data = data.sample(n=100)
+        self.lock.release()
         bmi = list(data['bmi'])
         cost = list(data['charges'])
+        self.lock.acquire()
         data = sorted(zip(bmi, cost)) # Unsure if we should change this to using one of the algorithms, may make it easier to track time complexity?
         bmis, costs = zip(*data)
-        self.lock.acquire()
         ax.plot(bmis, costs)
         ax.set_title("BMI vs Medical Insurance Cost")
         ax.set_xlabel("BMI")
@@ -136,11 +142,14 @@ class Visual:
         self.lock.release()
 
     def numOfChildrenLineGraph(self, data, ax):
+        self.lock.acquire()
+        data = data.sample(n=100)
+        self.lock.release()
         numOfChildren = list(data['children'])
         cost = list(data['charges'])
+        self.lock.acquire()
         data = sorted(zip(numOfChildren, cost)) # Unsure if we should change this to using one of the algorithms, may make it easier to track time complexity?
         numOfChildren, costs = zip(*data)
-        self.lock.acquire()
         ax.plot(numOfChildren, costs)
         ax.set_title("Number of Children vs Medical Insurance Cost")
         ax.set_xlabel("Number of Children")
@@ -149,11 +158,9 @@ class Visual:
 
     def drawAllLineGraphs(self, data, axAge_L, axBMI_L, axNumOfChildren_L):
         # The line graphs compare how medical insurance cost increases based on a specific attribute (how insurance cost is affected with age, bmi, and number of children)
-        with self.lock:
-            dataSample = data[['age', 'bmi', 'children', 'charges']].sample(n=100)
-        self.ageLineGraph(dataSample, axAge_L)
-        self.bmiLineGraph(dataSample, axBMI_L)
-        self.numOfChildrenLineGraph(dataSample, axNumOfChildren_L)
+        self.ageLineGraph(data, axAge_L)
+        self.bmiLineGraph(data, axBMI_L)
+        self.numOfChildrenLineGraph(data, axNumOfChildren_L)
 
     def agePieGraph(self, data, ax):
         age = data['age']
