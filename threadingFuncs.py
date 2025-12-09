@@ -153,11 +153,16 @@ class Thread:
 
             if is_numeric:
                 search_val = float(searchInfo)
-                search_upper = search_val + 1.0
+                if searchBy == "charges":
+                    search_lower = search_val * 1000
+                    search_upper = search_lower + 10000
+                else:
+                    search_lower = search_val
+                    search_upper = search_val + 1.0
 
                 for idx in range(len(chunk)):
                     val = float(chunk.iloc[idx][searchBy])
-                    if search_val <= val < search_upper:
+                    if search_lower <= val < search_upper:
                         localFound.append(chunk.iloc[idx])
             else:
                 for idx in range(len(chunk)):
@@ -181,31 +186,39 @@ class Thread:
         foundElements = []
         lock = threading.Lock()
 
-        # Binary search requires sorted data
         sortedData = data.sort_values(by=searchBy).reset_index(drop=True)
         chunks = self.dataChunk(sortedData, numOfThreads)
         is_numeric = searchBy in ["age", "bmi", "charges"]
+
         def threadSearch(chunk):
             if len(chunk) == 0:
                 return
-            low = 0
-            high = len(chunk) - 1
+
             localFound = []
+
             if is_numeric:
                 search_val = float(searchInfo)
-                search_upper = search_val + 1.0
-                first_idx = -1
+
+                if searchBy == "charges":
+                    search_lower = search_val * 1000
+                    search_upper = search_lower + 10000
+                else:
+                    search_lower = search_val
+                    search_upper = search_val + 1.0
+
                 temp_low, temp_high = 0, len(chunk) - 1
+                first_idx = -1
 
                 while temp_low <= temp_high:
                     mid = (temp_low + temp_high) // 2
                     mid_val = float(chunk.iloc[mid][searchBy])
 
-                    if mid_val >= search_val:
+                    if mid_val >= search_lower:
                         first_idx = mid
                         temp_high = mid - 1
                     else:
                         temp_low = mid + 1
+
                 if first_idx != -1:
                     idx = first_idx
                     while idx < len(chunk):
@@ -217,8 +230,8 @@ class Thread:
                             break
 
             else:
-                # String
                 search_str = str(searchInfo)
+                low, high = 0, len(chunk) - 1
 
                 while low <= high:
                     mid = (low + high) // 2
@@ -234,15 +247,12 @@ class Thread:
                             localFound.append(chunk.iloc[left])
                             left -= 1
 
-
                         right = mid + 1
                         while right < len(chunk) and str(chunk.iloc[right][searchBy]) == search_str:
                             localFound.append(chunk.iloc[right])
                             right += 1
-
                         break
 
-            # Lock only once to append all local results
             if localFound:
                 lock.acquire()
                 foundElements.extend(localFound)
