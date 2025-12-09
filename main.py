@@ -53,11 +53,6 @@ def on_filter_selected(filter_vars, filter_dropdowns, search_threads_var, search
     algorithm = search_algo_var.get()
 
     for col, val in checked_filters.items():
-        if col in ["age", "bmi", "charges"]:
-            val = float(val)  # dropdown value as float
-            # Filter the DataFrame first to only include rows in the bucket
-            filtered_df = filtered_df[(filtered_df[col] >= val) & (filtered_df[col] < val + 1)]
-
         start = time.perf_counter_ns()
         if algorithm == "Linear":
             filtered_df = thread.multitLinearSearch(filtered_df, num_threads, col, val)
@@ -274,7 +269,7 @@ def main():
         "smoker": ["yes", "no"],
         "region": ["northeast", "northwest", "southeast", "southwest"],
         "children": [str(i) for i in range(0, 6)],
-        "charges": [str(i) for i in range(10000, 20000)]
+        "charges": [str(i) for i in range(0, 100,10)]
     }
 
     row = 4
