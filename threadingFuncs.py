@@ -100,7 +100,7 @@ class Thread:
 
         end = time.perf_counter_ns()
         print(f"-------- {numOfThreads} Threads running '{functionName}' sorting function -------")
-        print("Execution Time: ", end - start)
+        print(f"Execution Time: {end-start:,} ns")
         if functionName == 'Selection Sort':
             print("Selection Sort: ", sortedMedChargesSelection)
         elif functionName == 'Insertion Sort':
@@ -135,7 +135,7 @@ class Thread:
         # plt.show()
         end = time.perf_counter_ns()
         print(f"-------- {numOfThreads} Threads running {functionName} function -------")
-        print("Execution Time: ", end - start)
+        print(f"Execution Time: {end-start:,} ns")
         return (end - start)
 
     def dataChunk(self, data, numOfThreads):
