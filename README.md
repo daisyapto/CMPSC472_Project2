@@ -6,6 +6,6 @@ Medical Insurance Database System Simulation with Operating System Concepts
 - Working with medical insurance dataset from Kaggle: https://www.kaggle.com/datasets/gauravduttakiit/medical-insurance-cost/data
 
 ### To run our application:
-- Clone the entire GitHub repository
-- Download the Train_Data.csv file from our dataset link
+- Download all Python files in the GitHub repository
+- Download the Train_Data.csv file from our dataset link into the same directory as the Python code
 - Run main.py to run application and interact with user interface
