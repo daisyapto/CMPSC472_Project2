@@ -262,7 +262,4 @@ Refer:
 https://stackoverflow.com/questions/54237067/how-to-make-tkinter-gui-thread-safe
 https://stackoverflow.com/questions/50525849/why-more-number-of-threads-takes-more-time-to-process
 https://www.reddit.com/r/learnpython/comments/10qzto6/how_does_tkinter_multithreading_work_and_why/
-#https://www.geeksforgeeks.org/dsa/linear-search-using-multi-threading/
-#https://www.geeksforgeeks.org/python/python-program-for-binary-search/
-#https://www.geeksforgeeks.org/dsa/binary-search-using-pthread/
 """

@@ -28,6 +28,9 @@ thread = Thread()
 
 data = pd.read_csv("Train_Data.csv")
 data = data.drop_duplicates()
+# Sample used for Line Chart, only sample once on the first run, to avoid plotting multiple samples onto the same graph
+# When called again, uses same sample to overwrite onto plot rather than add new sample to same plot
+dataSample = data.sample(n=100)
 
 def on_filter_toggle(filter_name, filter_vars, filter_dropdowns):
     if filter_vars[filter_name].get():  # checked
@@ -96,6 +99,8 @@ def displayGraph(interface, figureList, r, c, co): # r = row, c = col, co = coun
         c += 1
         co += 1
 
+# No longer using
+"""
 def displaySortedTableOutsideSelectionInsertionSort(sorted, sort_frame):
     columns = ("Index", "Age", "Sex", "BMI", "Children", "Smoker", "Region", "Charges")
     sort_table = ttk.Treeview(sort_frame, columns=columns, show="headings")
@@ -107,6 +112,7 @@ def displaySortedTableOutsideSelectionInsertionSort(sorted, sort_frame):
     # Since this sorted table is just for display purposes, use built in sort and do not count towards selection/insertion sort threads execution time
     sortedData = sorted.sort_values(by='charges')
     update_table(sortedData, sort_table)
+"""
 
 # Unsure if we should use this method to remove previous generated graphs
 # Ref: Google - how to check grid information in tkinter without element names
@@ -116,7 +122,7 @@ def clearPreviousGraphs(interface):
         if gridSpot and gridSpot.get("row") >= 3 and gridSpot.get("column") >= 0:
             item.destroy()
 
-def submitAndProcess(interface, functionCall, threadAmount):
+def submitAndProcess(interface, functionCall, threadAmount, dataSamp):
     function = functionCall.get()
     threadCount = int(threadAmount.get())
     #print(graphDisplay)
@@ -127,7 +133,6 @@ def submitAndProcess(interface, functionCall, threadAmount):
     #print("Min", min(data['charges']))
     #print("Max", max(data['charges']))
 
-
     if function == 'Pie Chart':
         clearPreviousGraphs(interface)
         call = thread.callVisualFunction(data, threadCount, 'Pie Chart')
@@ -136,7 +141,7 @@ def submitAndProcess(interface, functionCall, threadAmount):
         execTime.grid(row=1, column=2, padx=10, pady=10)
     elif function == 'Line Chart':
         clearPreviousGraphs(interface)
-        call = thread.callVisualFunction(data, threadCount, 'Line Chart')
+        call = thread.callVisualFunction(dataSamp, threadCount, 'Line Chart')
         displayGraph(interface, lineGraphFigures, displayRow, displayCol, displayCount)
         execTime = tk.Label(interface, text=f"Visualization Execution Time: {call}", bg='lightblue', fg='black', font=('arial', 16))
         execTime.grid(row=1, column=2, padx=10, pady=10)
@@ -149,23 +154,23 @@ def submitAndProcess(interface, functionCall, threadAmount):
     elif function == 'Selection Sort':
         call = thread.callSortFunction(data, threadCount, 'Selection Sort')
         execTime = tk.Label(interface, text=f"Sorting Execution Time: {call[0]}", bg='lightblue', fg='black', font=('arial', 16))
-        execTime.grid(row=1, column=2, padx=10, pady=10)
-        listPreview = tk.Label(interface, text=f"Sorted List Preview: {call[1][:20]}...", bg='lightblue', fg='black', font=('arial', 16))
-        listPreview.grid(row=2, column=2, padx=10, pady=10)
-        displaySortedTableOutsideSelectionInsertionSort(data, interface)
+        execTime.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        listPreview = tk.Label(interface, text=f"Sorted List Preview: {call[1][:10]}...", bg='lightblue', fg='black', font=('arial', 16))
+        listPreview.grid(row=4, column=0, padx=10, pady=10, sticky="w")
+        # displaySortedTableOutsideSelectionInsertionSort(data, interface)
     elif function == 'Insertion Sort':
         call = thread.callSortFunction(data, threadCount, 'Insertion Sort')
         execTime = tk.Label(interface, text=f"Sorting Execution Time: {call[0]}", bg='lightblue', fg='black', font=('arial', 16))
-        execTime.grid(row=1, column=2, padx=10, pady=10)
-        listPreview = tk.Label(interface, text=f"Sorted List Preview: {call[2][:20]}...", bg='lightblue', fg='black', font=('arial', 16))
-        listPreview.grid(row=2, column=2, padx=10, pady=10)
-        displaySortedTableOutsideSelectionInsertionSort(data, interface)
+        execTime.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        listPreview = tk.Label(interface, text=f"Sorted List Preview: {call[2][:10]}...", bg='lightblue', fg='black', font=('arial', 16))
+        listPreview.grid(row=4, column=0, padx=10, pady=10, sticky="w")
+        # displaySortedTableOutsideSelectionInsertionSort(data, interface)
 
 def main():
     interface = tk.Tk()
     interface.title("Medical Insurance Database")
     interface.configure(bg='lightblue')
-    interface.geometry("1600x1400")
+    interface.geometry("1800x1400")
     interface.attributes('-topmost', True)
 
     # Ref: Google & Stack Overflow, how to allow notebook to resize with window size
@@ -204,7 +209,7 @@ def main():
     threadLabel.grid(row=2, column=0, padx=10, pady=10, sticky=tk.W)
     threadMenu1 = tk.OptionMenu(visual_frame, threadVar1, *threads1)
     threadMenu1.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
-    submitGraph = tk.Button(visual_frame, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(visual_frame, graphVar, threadVar1))
+    submitGraph = tk.Button(visual_frame, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(visual_frame, graphVar, threadVar1, dataSample))
     submitGraph.grid(row=2, column=2, padx=10, pady=10, sticky=tk.W)
 
     # Sort
@@ -221,7 +226,7 @@ def main():
     threadLabel.grid(row=2, column=0, padx=10, pady=10, sticky=tk.W)
     threadMenu2 = tk.OptionMenu(sort_frame, threadVar2, *threads2)
     threadMenu2.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
-    submitSort = tk.Button(sort_frame, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(sort_frame, sortVar, threadVar2))
+    submitSort = tk.Button(sort_frame, text="Submit", bg='lightblue', fg='black', command=lambda: submitAndProcess(sort_frame, sortVar, threadVar2, dataSample))
     submitSort.grid(row=2, column=2, padx=10, pady=10, sticky=tk.W)
 
 ####### Search Frame #######
