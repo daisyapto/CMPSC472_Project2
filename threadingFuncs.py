@@ -142,82 +142,119 @@ class Thread:
         dataChunks = np.array_split(data, numOfThreads)
         return dataChunks
 
-    def lineSearch(self, data, searchBy, searchInfo): # No thread use
+    def multitLinearSearch(self, data, numOfThreads, searchBy, searchInfo):
         foundElements = []
-        for idx, row in data.iterrows():
-            if row[searchBy] == searchInfo:
-                foundElements.append(row)
-        return pd.DataFrame(foundElements)
-
-
-    def multitLinearSearch(self, data, numOfThreads, searchBy, searchInfo): # Thread use
-        rows = len(data)
-        foundElements =[]
         lock = threading.Lock()
         chunks = self.dataChunk(data, numOfThreads)
+        is_numeric = searchBy in ["age", "bmi", "charges"] # if numeric
+
         def threadSearch(chunk):
-            for idx, row in chunk.iterrows():
-                if str(row[searchBy]) == str(searchInfo):
-                    lock.acquire()
-                    foundElements.append(row)
-                    lock.release()
+            localFound = []
+
+            if is_numeric:
+                search_val = float(searchInfo)
+                search_upper = search_val + 1.0
+
+                for idx in range(len(chunk)):
+                    val = float(chunk.iloc[idx][searchBy])
+                    if search_val <= val < search_upper:
+                        localFound.append(chunk.iloc[idx])
+            else:
+                for idx in range(len(chunk)):
+                    if str(chunk.iloc[idx][searchBy]) == searchInfo:
+                        localFound.append(chunk.iloc[idx])
+
+            if localFound:
+                lock.acquire()
+                foundElements.extend(localFound)
+                lock.release()
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=numOfThreads) as executor:
-            for chunk in chunks:
-                executor.submit(threadSearch, chunk)
+            executor.map(threadSearch, chunks)
 
-
-        return pd.DataFrame(foundElements)
-
-    '''
-    def binarySearch(self,data, numOfThreads, searchBy, searchInfo):
-        sortedData = thread.callSortFunction(data, numOfThreads, "Insertion Sort")
-        low = 0
-        high = len(sortedData) - 1
-
-        while low <= high:
-            mid = low + (high - low) // 2
-
-            if sortedData[mid] < x:
-                low = mid + 1
-            elif sortedData[mid] > x:
-                high = mid - 1
-            else:
-                return mid
-        return -1'''
+        if foundElements:
+            return pd.DataFrame(foundElements)
+        else:
+            return pd.DataFrame()
 
     def multitBinarySearch(self, data, numOfThreads, searchBy, searchInfo):
         foundElements = []
         lock = threading.Lock()
 
-        # Binary requires sorted data
+        # Binary search requires sorted data
         sortedData = data.sort_values(by=searchBy).reset_index(drop=True)
-
         chunks = self.dataChunk(sortedData, numOfThreads)
-
+        is_numeric = searchBy in ["age", "bmi", "charges"]
         def threadSearch(chunk):
+            if len(chunk) == 0:
+                return
             low = 0
             high = len(chunk) - 1
+            localFound = []
+            if is_numeric:
+                search_val = float(searchInfo)
+                search_upper = search_val + 1.0
+                first_idx = -1
+                temp_low, temp_high = 0, len(chunk) - 1
 
-            while low <= high:
-                mid = (low + high) // 2
-                value = chunk.loc[mid, searchBy]
+                while temp_low <= temp_high:
+                    mid = (temp_low + temp_high) // 2
+                    mid_val = float(chunk.iloc[mid][searchBy])
 
-                if str(value) < str(searchInfo):
-                    low = mid + 1
-                elif str(value) > str(searchInfo):
-                    high = mid - 1
-                else:
-                    # Lock before modifying shared list
-                    lock.acquire()
-                    foundElements.append(chunk.iloc[mid])
-                    lock.relase ()
-                    return  # exit thread
+                    if mid_val >= search_val:
+                        first_idx = mid
+                        temp_high = mid - 1
+                    else:
+                        temp_low = mid + 1
+                if first_idx != -1:
+                    idx = first_idx
+                    while idx < len(chunk):
+                        val = float(chunk.iloc[idx][searchBy])
+                        if val < search_upper:
+                            localFound.append(chunk.iloc[idx])
+                            idx += 1
+                        else:
+                            break
+
+            else:
+                # String
+                search_str = str(searchInfo)
+
+                while low <= high:
+                    mid = (low + high) // 2
+                    value = str(chunk.iloc[mid][searchBy])
+
+                    if value < search_str:
+                        low = mid + 1
+                    elif value > search_str:
+                        high = mid - 1
+                    else:
+                        left = mid
+                        while left >= 0 and str(chunk.iloc[left][searchBy]) == search_str:
+                            localFound.append(chunk.iloc[left])
+                            left -= 1
+
+
+                        right = mid + 1
+                        while right < len(chunk) and str(chunk.iloc[right][searchBy]) == search_str:
+                            localFound.append(chunk.iloc[right])
+                            right += 1
+
+                        break
+
+            # Lock only once to append all local results
+            if localFound:
+                lock.acquire()
+                foundElements.extend(localFound)
+                lock.release()
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=numOfThreads) as executor:
             executor.map(threadSearch, chunks)
 
-        return pd.DataFrame(foundElements)
+        if foundElements:
+            return pd.DataFrame(foundElements)
+        else:
+            return pd.DataFrame()
 
 
 """
@@ -225,4 +262,7 @@ Refer:
 https://stackoverflow.com/questions/54237067/how-to-make-tkinter-gui-thread-safe
 https://stackoverflow.com/questions/50525849/why-more-number-of-threads-takes-more-time-to-process
 https://www.reddit.com/r/learnpython/comments/10qzto6/how_does_tkinter_multithreading_work_and_why/
+#https://www.geeksforgeeks.org/dsa/linear-search-using-multi-threading/
+#https://www.geeksforgeeks.org/python/python-program-for-binary-search/
+#https://www.geeksforgeeks.org/dsa/binary-search-using-pthread/
 """
